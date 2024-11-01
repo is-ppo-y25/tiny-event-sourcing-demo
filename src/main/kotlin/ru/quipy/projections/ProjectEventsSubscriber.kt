@@ -4,11 +4,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import ru.quipy.api.ProjectAggregate
-import ru.quipy.api.TagAssignedToTaskEvent
-import ru.quipy.api.TagCreatedEvent
-import ru.quipy.api.TaskCreatedEvent
+import ru.quipy.api.*
+import ru.quipy.core.annotations.DomainEvent
+import ru.quipy.domain.Event
 import ru.quipy.streams.AggregateSubscriptionsManager
+import java.awt.Color
+import java.util.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -22,17 +23,24 @@ class ProjectEventsSubscriber {
     @PostConstruct
     fun init() {
         subscriptionsManager.createSubscriber(ProjectAggregate::class, "some-meaningful-name") {
+            `when`(ProjectCreatedEvent::class) { event ->
+                logger.info("Project created: {}", event.projectId)
+            }
+
+            `when`(AddingUserToProjectEvent::class) { event ->
+                logger.info("User {} adding to Project {}: ", event.newAssigneeId, event.projectId)
+            }
 
             `when`(TaskCreatedEvent::class) { event ->
-                logger.info("Task created: {}", event.taskName)
+                logger.info("Task created: {}", event.taskId)
             }
 
-            `when`(TagCreatedEvent::class) { event ->
-                logger.info("Tag created: {}", event.tagName)
+            `when`(StatusCreatedEvent::class) { event ->
+                logger.info("Status created: {}", event.statusId)
             }
 
-            `when`(TagAssignedToTaskEvent::class) { event ->
-                logger.info("Tag {} assigned to task {}: ", event.tagId, event.taskId)
+            `when`(StatusDeletedEvent::class) { event ->
+                logger.info("Status deleted: {}", event.statusId)
             }
         }
     }
