@@ -1,9 +1,10 @@
 package ru.quipy.logic
 
 import ru.quipy.api.ProjectCreatedEvent
-import ru.quipy.api.TagAssignedToTaskEvent
-import ru.quipy.api.TagCreatedEvent
 import ru.quipy.api.TaskCreatedEvent
+import ru.quipy.api.UserAssignedEvent
+import ru.quipy.api.StatusChangedEvent
+import ru.quipy.api.NameChangedEvent
 import java.util.*
 
 
@@ -22,21 +23,30 @@ fun ProjectAggregateState.addTask(name: String): TaskCreatedEvent {
     return TaskCreatedEvent(projectId = this.getId(), taskId = UUID.randomUUID(), taskName = name)
 }
 
-fun ProjectAggregateState.createTag(name: String): TagCreatedEvent {
-    if (projectTags.values.any { it.name == name }) {
-        throw IllegalArgumentException("Tag already exists: $name")
-    }
-    return TagCreatedEvent(projectId = this.getId(), tagId = UUID.randomUUID(), tagName = name)
-}
-
-fun ProjectAggregateState.assignTagToTask(tagId: UUID, taskId: UUID): TagAssignedToTaskEvent {
-    if (!projectTags.containsKey(tagId)) {
-        throw IllegalArgumentException("Tag doesn't exists: $tagId")
-    }
-
+fun ProjectAggregateState.assignUser(taskId: UUID, assigneeId: UUID): UserAssignedEvent {
     if (!tasks.containsKey(taskId)) {
         throw IllegalArgumentException("Task doesn't exists: $taskId")
     }
 
-    return TagAssignedToTaskEvent(projectId = this.getId(), tagId = tagId, taskId = taskId)
+    // TODO: проверка того что assignee это участник проекта
+
+    return UserAssignedEvent(getId(), taskId, assigneeId)
+}
+
+fun ProjectAggregateState.changeStatus(taskId: UUID, statusId: UUID): StatusChangedEvent {
+    if (!tasks.containsKey(taskId)) {
+        throw IllegalArgumentException("Task doesn't exists: $taskId")
+    }
+
+    // TODO: проверка на наличие статуса
+    
+    return StatusChangedEvent(getId(), taskId, statusId)
+}
+
+fun ProjectAggregateState.changeName(taskId: UUID, name: String): NameChangedEvent {
+    if (!tasks.containsKey(taskId)) {
+        throw IllegalArgumentException("Task doesn't exists: $taskId")
+    }
+
+    return NameChangedEvent(getId(), taskId, name)
 }
