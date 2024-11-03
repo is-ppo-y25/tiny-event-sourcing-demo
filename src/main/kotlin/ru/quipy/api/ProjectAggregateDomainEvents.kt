@@ -6,6 +6,9 @@ import java.util.*
 
 const val PROJECT_CREATED_EVENT = "PROJECT_CREATED_EVENT"
 const val TASK_CREATED_EVENT = "TASK_CREATED_EVENT"
+const val USER_CREATED_EVENT = "USER_CREATED_EVENT"
+const val USER_UPDATED_EVENT = "USER_UPDATED_EVENT"
+const val USER_MANAGER_CREATED_EVENT = "USER_MANAGER_CREATED_EVENT"
 
 const val USER_ASSIGNED_EVENT = "USER_ASSIGNED_EVENT"
 const val STATUS_CHANGED_EVENT = "STATUS_CHANGED_EVENT"
@@ -14,24 +17,60 @@ const val NAME_CHANGED_EVENT = "NAME_CHANGED_EVENT"
 // API
 @DomainEvent(name = PROJECT_CREATED_EVENT)
 class ProjectCreatedEvent(
-    val projectId: UUID,
-    val title: String,
-    val creatorId: String,
-    createdAt: Long = System.currentTimeMillis(),
+        val projectId: UUID,
+        val title: String,
+        val creatorId: String,
+        createdAt: Long = System.currentTimeMillis(),
 ) : Event<ProjectAggregate>(
-    name = PROJECT_CREATED_EVENT,
-    createdAt = createdAt,
+        name = PROJECT_CREATED_EVENT,
+        createdAt = createdAt,
 )
+
 
 @DomainEvent(name = TASK_CREATED_EVENT)
 class TaskCreatedEvent(
-    val projectId: UUID,
-    val taskId: UUID,
-    val taskName: String,
-    createdAt: Long = System.currentTimeMillis(),
+        val projectId: UUID,
+        val taskId: UUID,
+        val taskName: String,
+        createdAt: Long = System.currentTimeMillis(),
 ) : Event<ProjectAggregate>(
-    name = TASK_CREATED_EVENT,
-    createdAt = createdAt
+        name = TASK_CREATED_EVENT,
+        createdAt = createdAt
+)
+
+@DomainEvent(name = USER_CREATED_EVENT)
+class UserCreatedEvent(
+        val userManagerId:UUID,
+        val userId: UUID,
+        val nickname: String,
+        val userName: String,
+        val password: String,
+        createdAt: Long = System.currentTimeMillis()
+) : Event<UserManagerAggregate>(
+        name = USER_CREATED_EVENT,
+        createdAt = createdAt
+)
+
+@DomainEvent(name = USER_UPDATED_EVENT)
+class UserUpdatedEvent(
+        val userManagerId:UUID,
+        val userId: UUID,
+        val nickname: String,
+        val userName: String,
+        val password: String,
+        createdAt: Long = System.currentTimeMillis()
+) : Event<UserManagerAggregate>(
+        name = USER_UPDATED_EVENT,
+        createdAt = createdAt
+)
+
+@DomainEvent(name = USER_MANAGER_CREATED_EVENT)
+class UserManagerCreatedEvent(
+        val userManagerId: UUID,
+        createdAt: Long = System.currentTimeMillis(),
+) : Event<UserManagerAggregate>(
+        name = USER_MANAGER_CREATED_EVENT,
+        createdAt = createdAt
 )
 
 @DomainEvent(USER_ASSIGNED_EVENT)
