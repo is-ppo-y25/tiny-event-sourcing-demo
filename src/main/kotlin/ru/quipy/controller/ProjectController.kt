@@ -44,6 +44,14 @@ class ProjectController(
         return ResponseEntity.ok(listOf(projectCreated, statusCreated))
     }
 
+    @PostMapping("/{projectId}/tasks")
+    fun createTask(@PathVariable projectId: UUID,
+                   @RequestParam taskName: String) : ResponseEntity<TaskCreatedEvent> {
+        return ResponseEntity.ok(projectEsService.update(projectId) {
+            it.createTask(taskName = taskName)
+        })
+    }
+
     @PostMapping("/{projectId}/assignees")
     fun assignUserToProject(@PathVariable projectId: UUID,
                             @RequestParam newAssigneeId : UUID,

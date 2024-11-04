@@ -66,6 +66,10 @@ fun ProjectAggregateState.changeStatus(taskId: UUID, statusId: UUID): StatusChan
         throw IllegalArgumentException("Task doesn't exists: $taskId")
     }
 
+    if (!statuses.containsKey(statusId)){
+        throw IllegalArgumentException("Status doesn't exists: $statusId")
+    }
+
     return StatusChangedEvent(getId(), taskId, statusId)
 }
 
@@ -75,4 +79,12 @@ fun ProjectAggregateState.changeName(taskId: UUID, name: String): NameChangedEve
     }
 
     return NameChangedEvent(getId(), taskId, name)
+}
+
+fun ProjectAggregateState.createTask(taskName: String): TaskCreatedEvent {
+    if (tasks.values.any { it.name == taskName }) {
+        throw IllegalArgumentException("Task already exists: $taskName")
+    }
+
+    return TaskCreatedEvent(projectId = this.getId(), taskId = UUID.randomUUID(), taskName = taskName)
 }
