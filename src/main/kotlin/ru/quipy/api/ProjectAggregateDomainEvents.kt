@@ -2,10 +2,16 @@ package ru.quipy.api
 
 import ru.quipy.core.annotations.DomainEvent
 import ru.quipy.domain.Event
+import java.awt.Color
 import java.util.*
 
 const val PROJECT_CREATED_EVENT = "PROJECT_CREATED_EVENT"
 const val TASK_CREATED_EVENT = "TASK_CREATED_EVENT"
+
+const val ADDING_USER_TO_PROJECT_EVENT = "ADDING_USER_TO_PROJECT_EVENT"
+const val STATUS_CREATED_EVENT = "STATUS_CREATED_EVENT"
+const val STATUS_DELETED_EVENT = "STATUS_DELETED_EVENT"
+
 const val USER_CREATED_EVENT = "USER_CREATED_EVENT"
 const val USER_UPDATED_EVENT = "USER_UPDATED_EVENT"
 const val USER_MANAGER_CREATED_EVENT = "USER_MANAGER_CREATED_EVENT"
@@ -14,18 +20,27 @@ const val USER_ASSIGNED_EVENT = "USER_ASSIGNED_EVENT"
 const val STATUS_CHANGED_EVENT = "STATUS_CHANGED_EVENT"
 const val NAME_CHANGED_EVENT = "NAME_CHANGED_EVENT"
 
-// API
 @DomainEvent(name = PROJECT_CREATED_EVENT)
 class ProjectCreatedEvent(
-        val projectId: UUID,
-        val title: String,
-        val creatorId: String,
-        createdAt: Long = System.currentTimeMillis(),
+    val projectId: UUID,
+    val assigneeId: UUID,
+    val title: String,
+    createdAt: Long = System.currentTimeMillis()
 ) : Event<ProjectAggregate>(
-        name = PROJECT_CREATED_EVENT,
-        createdAt = createdAt,
+    name = PROJECT_CREATED_EVENT,
+    createdAt = createdAt
 )
 
+@DomainEvent(name = ADDING_USER_TO_PROJECT_EVENT)
+class AddingUserToProjectEvent(
+    val projectId: UUID,
+    val newAssigneeId : UUID,
+    val assigneeId : UUID,
+    createdAt: Long = System.currentTimeMillis()
+) : Event<ProjectAggregate>(
+    name = ADDING_USER_TO_PROJECT_EVENT,
+    createdAt = createdAt
+)
 
 @DomainEvent(name = TASK_CREATED_EVENT)
 class TaskCreatedEvent(
@@ -81,6 +96,28 @@ class UserAssignedEvent(
     createdAt: Long = System.currentTimeMillis()
 ) : Event<ProjectAggregate>(
     name = USER_ASSIGNED_EVENT,
+    createdAt = createdAt
+)
+
+@DomainEvent(name = STATUS_CREATED_EVENT)
+class StatusCreatedEvent(
+    val statusId: UUID,
+    val projectId: UUID,
+    val title: String,
+    val color: Color,
+    createdAt: Long = System.currentTimeMillis()
+) : Event<ProjectAggregate>(
+    name = STATUS_CREATED_EVENT,
+    createdAt = createdAt
+)
+
+@DomainEvent(name = STATUS_DELETED_EVENT)
+class StatusDeletedEvent(
+    val statusId: UUID,
+    val projectId: UUID,
+    createdAt: Long = System.currentTimeMillis()
+) : Event<ProjectAggregate>(
+    name = STATUS_DELETED_EVENT,
     createdAt = createdAt
 )
 
