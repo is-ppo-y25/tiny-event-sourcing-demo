@@ -54,7 +54,9 @@ fun ProjectAggregateState.assignUser(taskId: UUID, assigneeId: UUID): UserAssign
         throw IllegalArgumentException("Task doesn't exists: $taskId")
     }
 
-    // TODO: проверка того что assignee это участник проекта
+    if (!assignees.contains(assigneeId)) {
+        throw IllegalArgumentException("Assignee doesn't exists: $assigneeId")
+    }
 
     return UserAssignedEvent(getId(), taskId, assigneeId)
 }
@@ -64,8 +66,6 @@ fun ProjectAggregateState.changeStatus(taskId: UUID, statusId: UUID): StatusChan
         throw IllegalArgumentException("Task doesn't exists: $taskId")
     }
 
-    // TODO: проверка на наличие статуса
-    
     return StatusChangedEvent(getId(), taskId, statusId)
 }
 

@@ -29,13 +29,13 @@ class UserManagerAggregateState : AggregateState<UUID, UserManagerAggregate> {
     )
 
     @StateTransitionFunc
-    fun userManagerCreatedAply(event: UserManagerCreatedEvent) {
+    fun userManagerCreatedApply(event: UserManagerCreatedEvent) {
         userManagerId = event.userManagerId
         updatedAt = event.createdAt
     }
 
     @StateTransitionFunc
-    fun userCreatedAply(event: UserCreatedEvent) {
+    fun userCreatedApply(event: UserCreatedEvent) {
         userManagerId = event.userManagerId
         users[event.userId] = UserEntity(event.userId, event.nickname, event.userName, event.password)
         registeredNicknames.add(event.nickname)
@@ -43,7 +43,7 @@ class UserManagerAggregateState : AggregateState<UUID, UserManagerAggregate> {
     }
 
     @StateTransitionFunc
-    fun userUpdatedAply(event: UserUpdatedEvent) {
+    fun userUpdatedApply(event: UserUpdatedEvent) {
         userManagerId = event.userManagerId
         users[event.userId] = UserEntity(event.userId, event.nickname, event.userName, event.password)
         registeredNicknames.add(event.nickname)
