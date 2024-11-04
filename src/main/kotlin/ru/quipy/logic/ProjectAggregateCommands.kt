@@ -2,6 +2,10 @@ package ru.quipy.logic
 
 import ru.quipy.api.*
 import java.awt.Color
+import ru.quipy.api.ProjectCreatedEvent
+import ru.quipy.api.UserAssignedEvent
+import ru.quipy.api.StatusChangedEvent
+import ru.quipy.api.NameChangedEvent
 import java.util.*
 
 
@@ -43,4 +47,32 @@ fun ProjectAggregateState.statusDelete(statusId: UUID) : StatusDeletedEvent {
     }
 
     return StatusDeletedEvent(projectId = this.getId(), statusId = statusId)
+}
+
+fun ProjectAggregateState.assignUser(taskId: UUID, assigneeId: UUID): UserAssignedEvent {
+    if (!tasks.containsKey(taskId)) {
+        throw IllegalArgumentException("Task doesn't exists: $taskId")
+    }
+
+    // TODO: проверка того что assignee это участник проекта
+
+    return UserAssignedEvent(getId(), taskId, assigneeId)
+}
+
+fun ProjectAggregateState.changeStatus(taskId: UUID, statusId: UUID): StatusChangedEvent {
+    if (!tasks.containsKey(taskId)) {
+        throw IllegalArgumentException("Task doesn't exists: $taskId")
+    }
+
+    // TODO: проверка на наличие статуса
+    
+    return StatusChangedEvent(getId(), taskId, statusId)
+}
+
+fun ProjectAggregateState.changeName(taskId: UUID, name: String): NameChangedEvent {
+    if (!tasks.containsKey(taskId)) {
+        throw IllegalArgumentException("Task doesn't exists: $taskId")
+    }
+
+    return NameChangedEvent(getId(), taskId, name)
 }

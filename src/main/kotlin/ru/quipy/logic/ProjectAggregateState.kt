@@ -16,11 +16,11 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
     lateinit var creatorId: String
     var statuses = mutableMapOf<UUID, StatusEntity>()
     var assignees = mutableSetOf<UUID>()
+    var tasks = mutableMapOf<UUID, TaskEntity>()
 
     override fun getId() = projectId
 
     // State transition functions which is represented by the class member function
-
 
     @StateTransitionFunc
     fun projectCreatedApply(event: ProjectCreatedEvent) {
@@ -32,14 +32,33 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
     }
 
     @StateTransitionFunc
-    fun taskCreatedApply(event: TaskCreatedEvent) {
-        // TODO
-    }
-
-    @StateTransitionFunc
     fun addingUserToProjectApply(event: AddingUserToProjectEvent) {
         assignees.add(event.newAssigneeId)
         updatedAt = createdAt
+    }
+
+    @StateTransitionFunc
+    fun taskCreatedApply(event: TaskCreatedEvent) {
+        tasks[event.taskId] = TaskEntity(event.taskId, event.taskName, UUID.randomUUID(), mutableSetOf())
+        updatedAt = createdAt
+    }
+
+    @StateTransitionFunc
+    fun assignUserApply(event: UserAssignedEvent) {
+        tasks[event.taskId]?.assignees?.add(event.assigneeId)
+        updatedAt = event.createdAt
+    }
+
+    @StateTransitionFunc
+    fun changeStatusApply(event: StatusChangedEvent) {
+        tasks[event.taskId]?.status = event.statusId
+        updatedAt = event.createdAt
+    }
+
+    @StateTransitionFunc
+    fun changeNameApply(event: NameChangedEvent) {
+        tasks[event.taskId]?.name = event.newName
+        updatedAt = event.createdAt
     }
 
     @StateTransitionFunc
@@ -67,4 +86,11 @@ data class StatusEntity(
     val id: UUID = UUID.randomUUID(),
     val name: String,
     val color: Color
+)
+
+data class TaskEntity(
+    val id: UUID = UUID.randomUUID(),
+    var name: String,
+    var status: UUID,
+    val assignees: MutableSet<UUID>
 )

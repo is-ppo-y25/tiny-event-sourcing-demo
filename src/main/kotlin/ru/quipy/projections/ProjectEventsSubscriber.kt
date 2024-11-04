@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import ru.quipy.api.*
-import ru.quipy.core.annotations.DomainEvent
-import ru.quipy.domain.Event
+import ru.quipy.api.ProjectAggregate
+import ru.quipy.api.TaskCreatedEvent
+import ru.quipy.api.UserAssignedEvent
+import ru.quipy.api.StatusChangedEvent
+import ru.quipy.api.NameChangedEvent
 import ru.quipy.streams.AggregateSubscriptionsManager
-import java.awt.Color
-import java.util.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -41,6 +42,18 @@ class ProjectEventsSubscriber {
 
             `when`(StatusDeletedEvent::class) { event ->
                 logger.info("Status deleted: {}", event.statusId)
+            }
+
+            `when`(UserAssignedEvent::class) { event ->
+                logger.info("User {} is assigned to task {}", event.assigneeId, event.taskId)
+            }
+
+            `when`(StatusChangedEvent::class) { event ->
+                logger.info("Status of {} is changed to {}", event.taskId, event.statusId)
+            }
+
+            `when`(NameChangedEvent::class) { event ->
+                logger.info("Changed name of task {} to {}", event.taskId, event.newName)
             }
         }
     }
