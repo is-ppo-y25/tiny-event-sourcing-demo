@@ -3,18 +3,17 @@ package ru.quipy.projections
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import java.util.UUID
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
+import javax.persistence.*
 
 @Entity
-@TypeDef(name = "uuid-list", typeClass = MutableList::class)
 data class TaskProjectionData (
     @Id
     val taskId: UUID,
+    val projectId: UUID,
     var name: String,
     var status: UUID,
-    @Type(type = "uuid-list")
-    @Column(columnDefinition = "uuid[]")
-    val assignees: MutableList<UUID>
-) {}
+    @ElementCollection(fetch = FetchType.EAGER)
+    val assignees: MutableSet<UUID>
+) {
+    constructor() : this(UUID(0, 0), UUID(0, 0), "", UUID(0, 0), mutableSetOf())
+}

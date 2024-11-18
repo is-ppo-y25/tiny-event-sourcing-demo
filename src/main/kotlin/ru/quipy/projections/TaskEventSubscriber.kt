@@ -17,7 +17,7 @@ class TaskEventSubscriber(
 ) {
     @SubscribeEvent
     fun newTask(event: TaskCreatedEvent) {
-        taskProjectionRepository.save(TaskProjectionData(event.taskId, event.taskName, UUID(0, 0), mutableListOf()))
+        taskProjectionRepository.save(TaskProjectionData(event.taskId, event.projectId, event.taskName, UUID(0, 0), mutableSetOf()))
     }
 
     @SubscribeEvent

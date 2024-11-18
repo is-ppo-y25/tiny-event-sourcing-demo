@@ -25,7 +25,6 @@ class ProjectController(
     val projectEsService: EventSourcingService<UUID, ProjectAggregate, ProjectAggregateState>,
     val taskProjectionRepository: TaskProjectionRepository
 ) {
-    @Autowired
     private val DEFAULT_CREATED_STATUS_COLOR = Color(0, 255, 0)
 
     @GetMapping("/{projectId}")
@@ -43,7 +42,7 @@ class ProjectController(
         }
 
         val statusCreated = projectEsService.update(projectCreated.projectId) {
-            it.statusCreate(statusId = UUID.randomUUID(), "CREATED", DEFAULT_CREATED_STATUS_COLOR)
+            it.statusCreate(statusId = UUID(0, 0), "CREATED", DEFAULT_CREATED_STATUS_COLOR)
         }
 
         return ResponseEntity.ok(listOf(projectCreated, statusCreated))
@@ -113,13 +112,13 @@ class ProjectController(
 
     @GetMapping("/{projectId}/tasks")
     fun getTasksInProject(@PathVariable projectId: UUID): ResponseEntity<List<TaskProjectionData>> {
-        return ResponseEntity.ok(taskProjectionRepository.findByProject(projectId))
+        return ResponseEntity.ok(taskProjectionRepository.findByProjectId(projectId))
     }
 
-    @GetMapping("/{projectIf}/tasksByStatus")
+    @GetMapping("/{projectId}/tasksByStatus")
     fun getTasksByStatus(@PathVariable projectId: UUID): ResponseEntity<Map<UUID, List<TaskProjectionData>>> {
         projectEsService.getState(projectId)
-        return ResponseEntity.ok(taskProjectionRepository.findByProject(projectId).groupBy { it.status })
+        return ResponseEntity.ok(taskProjectionRepository.findByProjectId(projectId).groupBy { it.status })
     }
 }
 

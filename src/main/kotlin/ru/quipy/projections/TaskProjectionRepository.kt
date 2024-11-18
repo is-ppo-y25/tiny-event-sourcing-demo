@@ -6,5 +6,5 @@ import java.util.UUID
 
 @Repository
 interface TaskProjectionRepository : JpaRepository<TaskProjectionData, UUID> {
-    fun findByProject(projectId: UUID): List<TaskProjectionData>
+    fun findByProjectId(projectId: UUID): List<TaskProjectionData>
 }
