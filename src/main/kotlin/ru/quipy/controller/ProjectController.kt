@@ -1,5 +1,6 @@
 package ru.quipy.controller
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import ru.quipy.api.*
@@ -14,12 +15,15 @@ import ru.quipy.logic.ProjectAggregateState
 import ru.quipy.logic.assignUser
 import ru.quipy.logic.changeStatus
 import ru.quipy.logic.changeName
+import ru.quipy.projections.TaskProjectionData
+import ru.quipy.projections.TaskProjectionRepository
 import java.util.*
 
 @RestController
 @RequestMapping("/projects")
 class ProjectController(
-    val projectEsService: EventSourcingService<UUID, ProjectAggregate, ProjectAggregateState>
+    val projectEsService: EventSourcingService<UUID, ProjectAggregate, ProjectAggregateState>,
+    val taskProjectionRepository: TaskProjectionRepository
 ) {
     private val DEFAULT_CREATED_STATUS_COLOR = Color(0, 255, 0)
 
@@ -38,7 +42,7 @@ class ProjectController(
         }
 
         val statusCreated = projectEsService.update(projectCreated.projectId) {
-            it.statusCreate(statusId = UUID.randomUUID(), "CREATED", DEFAULT_CREATED_STATUS_COLOR)
+            it.statusCreate(statusId = UUID(0, 0), "CREATED", DEFAULT_CREATED_STATUS_COLOR)
         }
 
         return ResponseEntity.ok(listOf(projectCreated, statusCreated))
@@ -104,6 +108,17 @@ class ProjectController(
         return ResponseEntity.ok(projectEsService.update(projectId) {
             it.changeName(taskId, request.name)
         })
+    }
+
+    @GetMapping("/{projectId}/tasks")
+    fun getTasksInProject(@PathVariable projectId: UUID): ResponseEntity<List<TaskProjectionData>> {
+        return ResponseEntity.ok(taskProjectionRepository.findByProjectId(projectId))
+    }
+
+    @GetMapping("/{projectId}/tasksByStatus")
+    fun getTasksByStatus(@PathVariable projectId: UUID): ResponseEntity<Map<UUID, List<TaskProjectionData>>> {
+        projectEsService.getState(projectId)
+        return ResponseEntity.ok(taskProjectionRepository.findByProjectId(projectId).groupBy { it.status })
     }
 }
 
