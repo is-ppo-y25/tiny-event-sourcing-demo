@@ -13,7 +13,8 @@ import ru.quipy.streams.annotation.SubscribeEvent
     aggregateClass = ProjectAggregate::class, subscriberName = "demo-subs-stream"
 )
 class AnnotationBasedProjectEventsSubscriber(
-    private val projectProjectionEventHandler : ProjectProjectionEventHandler) {
+    private val projectProjectionEventHandler : ProjectProjectionEventHandler,
+    private val statusProjectionEventHandler: StatusProjectionEventHandler) {
 
     val logger: Logger = LoggerFactory.getLogger(AnnotationBasedProjectEventsSubscriber::class.java)
 
@@ -33,11 +34,13 @@ class AnnotationBasedProjectEventsSubscriber(
     fun statusCreatedSubscriber(event: StatusCreatedEvent) {
         logger.info("Status created: {}", event.statusId)
         projectProjectionEventHandler.on(event)
+        statusProjectionEventHandler.on(event)
     }
 
     @SubscribeEvent
     fun statusDeletedSubscriber(event: StatusDeletedEvent) {
         logger.info("Status deleted: {}", event.statusId)
         projectProjectionEventHandler.on(event)
+        statusProjectionEventHandler.on(event)
     }
 }

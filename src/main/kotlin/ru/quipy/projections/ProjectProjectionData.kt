@@ -3,6 +3,7 @@ package ru.quipy.projections
 import java.util.*
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.Id
 import javax.persistence.Table
 
@@ -12,11 +13,11 @@ data class ProjectProjectionData (
     @Id
     val id: UUID,
     val name: String,
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     val participants: MutableSet<UUID> = mutableSetOf(),
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     val statuses: MutableSet<UUID> = mutableSetOf(),
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     val tasks: MutableSet<UUID> = mutableSetOf()
 ) {
     constructor() : this(
