@@ -1,6 +1,5 @@
 package ru.quipy.controller
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import ru.quipy.api.*
@@ -15,15 +14,16 @@ import ru.quipy.logic.ProjectAggregateState
 import ru.quipy.logic.assignUser
 import ru.quipy.logic.changeStatus
 import ru.quipy.logic.changeName
-import ru.quipy.projections.TaskProjectionData
-import ru.quipy.projections.TaskProjectionRepository
+import ru.quipy.projections.*
 import java.util.*
 
 @RestController
 @RequestMapping("/projects")
 class ProjectController(
     val projectEsService: EventSourcingService<UUID, ProjectAggregate, ProjectAggregateState>,
-    val taskProjectionRepository: TaskProjectionRepository
+    val taskProjectionRepository: TaskProjectionRepository,
+    val projectProjectionRepository: ProjectProjectionRepository,
+    val statusProjectionRepository: StatusProjectionRepository
 ) {
     private val DEFAULT_CREATED_STATUS_COLOR = Color(0, 255, 0)
 
@@ -68,7 +68,7 @@ class ProjectController(
     @PostMapping("/{projectId}/statuses")
     fun statusCreate(@PathVariable projectId: UUID,
                      @RequestBody request: StatusCreateRequest) : ResponseEntity<StatusCreatedEvent> {
-        val color = Color(request.color.red, request.color.green, request.color.red)
+        val color = Color(request.color.red, request.color.green, request.color.blue)
 
         return ResponseEntity.ok(projectEsService.update(projectId) {
             it.statusCreate(statusId = request.statusId, name = request.name, color = color)
@@ -119,6 +119,35 @@ class ProjectController(
     fun getTasksByStatus(@PathVariable projectId: UUID): ResponseEntity<Map<UUID, List<TaskProjectionData>>> {
         projectEsService.getState(projectId)
         return ResponseEntity.ok(taskProjectionRepository.findByProjectId(projectId).groupBy { it.status })
+    }
+
+    @GetMapping("details/{projectId}")
+    fun getProjectByID(@PathVariable projectId: UUID): ResponseEntity<ProjectProjectionData> {
+        val projectProjection = projectProjectionRepository.findById(projectId).orElse(null)
+        return if (projectProjection != null) {
+            ResponseEntity.ok(projectProjection)
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
+
+    @GetMapping("/{projectId}/statuses")
+    fun getStatusesInProject(@PathVariable projectId: UUID): ResponseEntity<Set<StatusProjectionData>> {
+        val projectProjection = projectProjectionRepository.findById(projectId).orElse(null)
+
+        return if (projectProjection != null) {
+            val statusList = mutableListOf<StatusProjectionData>()
+
+            for (statusId in projectProjection.statuses) {
+                val status = statusProjectionRepository.findById(statusId).orElse(null)
+                if (status != null) {
+                    statusList.add(status)
+                }
+            }
+            ResponseEntity.ok(statusList.toSet())
+        } else {
+            ResponseEntity.notFound().build()
+        }
     }
 }
 
