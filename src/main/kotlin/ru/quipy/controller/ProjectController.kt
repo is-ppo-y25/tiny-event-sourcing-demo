@@ -64,7 +64,7 @@ class ProjectController(
     @PostMapping("/{projectId}/statuses")
     fun statusCreate(@PathVariable projectId: UUID,
                      @RequestBody request: StatusCreateRequest) : ResponseEntity<StatusCreatedEvent> {
-        val color = Color(request.color.red, request.color.green, request.color.red)
+        val color = Color(request.color.red, request.color.green, request.color.blue)
 
         return ResponseEntity.ok(projectEsService.update(projectId) {
             it.statusCreate(statusId = request.statusId, name = request.name, color = color)
