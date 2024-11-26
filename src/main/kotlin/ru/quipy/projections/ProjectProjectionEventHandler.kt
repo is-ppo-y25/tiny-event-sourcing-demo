@@ -17,8 +17,6 @@ class ProjectProjectionEventHandler(
         )
 
         projectProjectionRepository.save(newProjectProjection)
-
-        val a = 3
     }
 
     fun on(event: AddingUserToProjectEvent) {
