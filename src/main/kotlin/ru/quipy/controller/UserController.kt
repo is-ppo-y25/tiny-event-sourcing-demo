@@ -9,12 +9,17 @@ import ru.quipy.logic.UserManagerAggregateState
 import ru.quipy.logic.create
 import ru.quipy.logic.createUser
 import ru.quipy.logic.updateUser
+import ru.quipy.projections.UserProjectionData
+import ru.quipy.projections.UserProjectionEventHandler
+import ru.quipy.projections.UserProjectionService
 import java.util.*
 
 @RestController
 @RequestMapping("/users")
 class UserController(
-        val userEsService: EventSourcingService<UUID, UserManagerAggregate, UserManagerAggregateState>
+        val userEsService: EventSourcingService<UUID, UserManagerAggregate, UserManagerAggregateState>,
+        private val userProjectionEventHandler: UserProjectionEventHandler,
+        private val userProjectionService: UserProjectionService
 
 ) {
     @PostMapping("/user-managers")
@@ -55,6 +60,8 @@ class UserController(
         val userId = UUID.randomUUID()
         val event = userEsService.update(userManagerId) { it.createUser(userManagerId, userId, nickname, name, password) }
 
+        userProjectionEventHandler.handle(event)
+
         return ResponseEntity.ok("User registered with ID: ${event.userId}")
     }
 
@@ -84,6 +91,15 @@ class UserController(
             it.updateUser(userManagerId, userId, nickname, name, password)
         }
 
+        userProjectionEventHandler.handle(event)
+
         return ResponseEntity.ok("User updated with ID: ${event.userId}")
+    }
+
+    @GetMapping("/searchUser")
+    fun getUserByName(@RequestParam nickname: String): UserProjectionData? {
+        val user = userProjectionService.findByNickname(nickname)
+                ?: throw IllegalArgumentException("No user found with nickname: $nickname")
+        return user
     }
 }
